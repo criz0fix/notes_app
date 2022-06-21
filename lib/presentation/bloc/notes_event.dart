@@ -27,3 +27,7 @@ class DeleteNote extends NotesEvent {
 
   DeleteNote({required this.index});
 }
+
+class ActivateSearchField extends NotesEvent {}
+
+class DeactivateSearchField extends NotesEvent {}
