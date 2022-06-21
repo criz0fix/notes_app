@@ -11,8 +11,8 @@ class AppRoutes {
         return _materialRoute(view: const NotesList());
       case Pages.notePage:
         return _materialRoute(
-            view: NotePage(
-                title: args?['title'], description: args?['description']));
+          view: NotePage(note: args?['note']),
+        );
       default:
         return null;
     }

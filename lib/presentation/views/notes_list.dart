@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notes_app/config/routes/pages.dart';
 import 'package:notes_app/config/themes/app_color.dart';
 import 'package:notes_app/core/utils/consts.dart';
+import 'package:notes_app/data/models/note.dart';
 import 'package:notes_app/presentation/bloc/notes_bloc.dart';
 import 'package:notes_app/presentation/views/note_page.dart';
 import 'package:notes_app/presentation/widgets/common_note_tile.dart';
@@ -14,6 +17,7 @@ class NotesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final myBloc = context.read<NotesBloc>();
     return BlocBuilder<NotesBloc, NotesState>(
       builder: (context, state) {
         return Scaffold(
@@ -27,9 +31,11 @@ class NotesList extends StatelessWidget {
             title: const Text(appTitle),
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.pushNamed(context, Pages.notePage);
-            },
+            onPressed: () async => await Navigator.pushNamed(
+                context, Pages.notePage, arguments: {
+              'note': Note.newNote()
+            }).then(
+                (newNote) => myBloc.add(CreateNote(newNote: newNote as Note))),
             child: const Icon(
               Icons.add_outlined,
               color: AppColor.white,
@@ -37,15 +43,25 @@ class NotesList extends StatelessWidget {
           ),
           body: ListView.builder(
               physics: const BouncingScrollPhysics(),
-              itemCount: 7,
+              itemCount: state.noteList.length,
               itemBuilder: ((context, index) {
-                return GestureDetector(
-                  onTap: () =>
-                      Navigator.pushNamed(context, Pages.notePage, arguments: {
-                    'title': testTitle,
-                    'description': testDescription,
-                  }),
-                  child: const CommonNoteTile(),
+                final item = state.noteList[index];
+                return Dismissible(
+                  key: UniqueKey(),
+                  onDismissed: (direction) {
+                    if (direction == DismissDirection.endToStart) {
+                      myBloc.add(DeleteNote(index: index));
+                    }
+                  },
+                  child: GestureDetector(
+                    onTap: () async => await Navigator.pushNamed(
+                            context, Pages.notePage, arguments: {'note': item})
+                        .then((editedNote) => myBloc.add(CompareNotes(
+                            newNote: editedNote as Note, index: index))),
+                    child: CommonNoteTile(
+                      noteTitle: item.title,
+                    ),
+                  ),
                 );
               })),
         );
@@ -53,8 +69,3 @@ class NotesList extends StatelessWidget {
     );
   }
 }
-
-// Scaffold(
-
-//           body: NotePage(),
-//         ),
