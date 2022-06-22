@@ -45,6 +45,13 @@ class AppTheme {
             fontWeight: FontWeight.w400,
           ),
         ),
+        bodyText2: GoogleFonts.nunito(
+          textStyle: const TextStyle(
+            color: AppColor.grey,
+            fontSize: 20.0,
+            fontWeight: FontWeight.w300,
+          ),
+        ),
       ),
       appBarTheme: AppBarTheme(
         systemOverlayStyle:

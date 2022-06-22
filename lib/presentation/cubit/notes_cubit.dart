@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:notes_app/data/models/note.dart';
@@ -17,10 +19,6 @@ class NotesCubit extends Cubit<PageNotesState> {
 
   void changeDescription(String newDescription) =>
       emit(state.copywith(description: newDescription));
-
-  bool validated() {
-    return true;
-  }
 
   void saveNote() => emit(state.copywith(time: DateTime.now()));
 }
