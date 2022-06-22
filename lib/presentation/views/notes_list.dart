@@ -68,7 +68,8 @@ class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
                 autofocus: true,
                 controller: searchController,
                 style: Theme.of(context).textTheme.bodyText2,
-                onChanged: (text) => myBloc.add(FindNote(searchingNote: text)),
+                onChanged: (text) =>
+                    myBloc..add(FindNote(searchingNote: searchController.text)),
                 decoration: InputDecoration(
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.close_rounded, color: AppColor.grey),
@@ -81,9 +82,11 @@ class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
                   filled: true,
                   fillColor: AppColor.black,
                   focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(30),
                   ),
                   border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
                       borderRadius: BorderRadius.circular(30)),
                 ),
               ),
