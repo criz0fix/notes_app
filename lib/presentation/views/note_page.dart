@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notes_app/config/themes/app_color.dart';
 
 import 'package:notes_app/data/models/note.dart';
+import 'package:notes_app/data/models/note_navigator_model.dart';
 import 'package:notes_app/presentation/bloc/notes_bloc.dart';
 import 'package:notes_app/presentation/cubit/notes_cubit.dart';
 import 'package:notes_app/presentation/widgets/custom_button.dart';
@@ -24,15 +27,23 @@ class NotePage extends StatelessWidget {
             appBar: AppBar(
               leadingWidth: 80,
               leading: CustomButton(
-                icon: Icons.arrow_back_rounded,
-                onPressed: () => Navigator.pop(
-                  context,
-                  Note(
-                      title: myCubit.state.title,
-                      description: myCubit.state.description,
-                      creationTime: myCubit.state.time),
-                ),
-              ),
+                  icon: Icons.arrow_back_rounded,
+                  onPressed: () {
+                    Navigator.pop(
+                        context,
+                        NoteNavigatorModel(
+                            note: Note(
+                                title: myCubit.state.title,
+                                description: myCubit.state.description),
+                            isSaved: myCubit.state.isSaved)
+
+                        // Note(
+                        //     title: myCubit.state.title,
+                        //     description: myCubit.state.description,
+                        //     creationTime: myCubit.state.time),
+                        );
+                    myCubit.resetSave();
+                  }),
               actions: <Widget>[
                 CustomButton(
                     iconSize: 30,

@@ -11,7 +11,8 @@ class NotesCubit extends Cubit<PageNotesState> {
       : super(PageNotesState(
             title: myNote.title,
             description: myNote.description,
-            time: myNote.creationTime));
+            readOnly: false,
+            isSaved: false));
 
   void changeToEdit() => emit(state.copywith(readOnly: !state.readOnly));
 
@@ -20,5 +21,7 @@ class NotesCubit extends Cubit<PageNotesState> {
   void changeDescription(String newDescription) =>
       emit(state.copywith(description: newDescription));
 
-  void saveNote() => emit(state.copywith(time: DateTime.now()));
+  void saveNote() => emit(state.copywith(noteId: 0, isSaved: true));
+
+  void resetSave() => emit(state.copywith(isSaved: false));
 }

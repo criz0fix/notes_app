@@ -7,9 +7,12 @@ import 'package:notes_app/config/routes/pages.dart';
 import 'package:notes_app/config/themes/app_color.dart';
 import 'package:notes_app/core/utils/consts.dart';
 import 'package:notes_app/data/models/note.dart';
+import 'package:notes_app/data/models/note_navigator_model.dart';
 import 'package:notes_app/presentation/bloc/notes_bloc.dart';
+import 'package:notes_app/presentation/cubit/notes_cubit.dart';
 import 'package:notes_app/presentation/widgets/common_note_tile.dart';
 import 'package:notes_app/presentation/widgets/custom_button.dart';
+import 'package:notes_app/presentation/widgets/delete_background.dart';
 
 class NotesList extends StatelessWidget {
   const NotesList({Key? key}) : super(key: key);
@@ -25,10 +28,10 @@ class NotesList extends StatelessWidget {
               appBar: _ChangeableAppBar(myBloc: myBloc),
               floatingActionButton: FloatingActionButton(
                 onPressed: () async => await Navigator.pushNamed(
-                        context, Pages.notePage,
-                        arguments: {'note': Note.newNote()})
-                    .then((newNote) =>
-                        myBloc.add(CreateNote(newNote: newNote as Note))),
+                    context, Pages.notePage, arguments: {
+                  'note': Note.newNote()
+                }).then((newNote) => myBloc.add(
+                    CreateNote(navigatorModel: newNote as NoteNavigatorModel))),
                 child: const Icon(
                   Icons.add_outlined,
                   color: AppColor.white,
@@ -38,11 +41,9 @@ class NotesList extends StatelessWidget {
                 builder: (context) {
                   if (state.status == NotesStates.inititalized ||
                       state.status == NotesStates.found) {
-                    return const _AllNotes();
+                    return _AllNotes();
                   } else {
-                    return const Center(
-                      child: Text('data'),
-                    );
+                    return _NotFoundPage();
                   }
                 },
               )),
@@ -54,12 +55,12 @@ class NotesList extends StatelessWidget {
 
 class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
   final NotesBloc myBloc;
+  static final searchController = TextEditingController();
 
   const _ChangeableAppBar({Key? key, required this.myBloc}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final searchController = TextEditingController();
     return myBloc.state.isSearchActive
         ? AppBar(
             title: SizedBox(
@@ -68,8 +69,13 @@ class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
                 autofocus: true,
                 controller: searchController,
                 style: Theme.of(context).textTheme.bodyText2,
-                onChanged: (text) =>
-                    myBloc..add(FindNote(searchingNote: searchController.text)),
+                onChanged: (text) {
+                  myBloc.add(FindNote(searchingNote: text));
+                  //myBloc.add(ChangeStatus(status: NotesStates.searching));
+                  // myBloc
+                  //   ..add(ChangeStatus(status: NotesStates.found))
+                  //   ..add(ChangeFoundList(foundNotes: searchingNotes));
+                },
                 decoration: InputDecoration(
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.close_rounded, color: AppColor.grey),
@@ -109,8 +115,9 @@ class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
 }
 
 class _AllNotes extends StatelessWidget {
-  const _AllNotes({Key? key}) : super(key: key);
+  _AllNotes({Key? key}) : super(key: key);
 
+  AlignmentDirectional? directioning;
   @override
   Widget build(BuildContext context) {
     final myBloc = context.read<NotesBloc>();
@@ -127,17 +134,23 @@ class _AllNotes extends StatelessWidget {
                 : state.foundNotes[index];
             return Dismissible(
               key: UniqueKey(),
+              background: const DeleteBackGround(),
               onDismissed: (direction) {
-                if (direction == DismissDirection.endToStart) {
-                  myBloc.add(DeleteNote(index: index));
-                }
+                myBloc.add(DeleteNote(index: index));
               },
               child: GestureDetector(
-                onTap: () async => await Navigator.pushNamed(
-                    context, Pages.notePage, arguments: {
-                  'note': item
-                }).then((editedNote) => myBloc.add(
-                    CompareNotes(newNote: editedNote as Note, index: index))),
+                onTap: () async {
+                  await Navigator.pushNamed(context, Pages.notePage,
+                      arguments: {'note': item}).then((editedNote) {
+                    // final myNoteList = editedNote as List;
+                    myBloc.add(
+                      CompareNotes(
+                          navigatorModel: editedNote as NoteNavigatorModel,
+                          index: myBloc.state.noteList.indexOf(item)),
+                    );
+                  });
+                  log(index.toString());
+                },
                 child: CommonNoteTile(
                   noteTitle: item.title,
                 ),
@@ -150,13 +163,11 @@ class _AllNotes extends StatelessWidget {
   }
 }
 
-class _SearchingNotes extends StatelessWidget {
-  const _SearchingNotes({Key? key}) : super(key: key);
+class _NotFoundPage extends StatelessWidget {
+  const _NotFoundPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('searching'),
-    );
+    return Center(child: Image.asset('assets/images/not-found.png'));
   }
 }

@@ -3,25 +3,26 @@ part of 'notes_cubit.dart';
 class PageNotesState extends Equatable {
   final String title;
   final String description;
-  final DateTime time;
   final bool readOnly;
+  final bool isSaved;
 
   const PageNotesState(
       {required this.title,
       required this.description,
-      required this.time,
-      this.readOnly = false});
+      required this.readOnly,
+      required this.isSaved});
 
   @override
-  List<Object> get props => [title, description, time, readOnly];
+  List<Object> get props => [title, description, readOnly, isSaved];
   PageNotesState copywith(
           {String? title,
           String? description,
-          DateTime? time,
-          bool? readOnly}) =>
+          bool? readOnly,
+          bool? isSaved,
+          int? noteId}) =>
       PageNotesState(
           title: title ?? this.title,
           description: description ?? this.description,
-          time: time ?? this.time,
-          readOnly: readOnly ?? this.readOnly);
+          readOnly: readOnly ?? this.readOnly,
+          isSaved: isSaved ?? this.isSaved);
 }
