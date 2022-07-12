@@ -4,16 +4,16 @@ part of 'notes_bloc.dart';
 abstract class NotesEvent {}
 
 class CreateNote extends NotesEvent {
-  final Note newNote;
+  final NoteNavigatorModel navigatorModel;
 
-  CreateNote({required this.newNote});
+  CreateNote({required this.navigatorModel});
 }
 
 class CompareNotes extends NotesEvent {
-  final Note newNote;
+  final NoteNavigatorModel navigatorModel;
   final int index;
 
-  CompareNotes({required this.newNote, required this.index});
+  CompareNotes({required this.navigatorModel, required this.index});
 }
 
 class FindNote extends NotesEvent {
@@ -31,3 +31,15 @@ class DeleteNote extends NotesEvent {
 class ActivateSearchField extends NotesEvent {}
 
 class DeactivateSearchField extends NotesEvent {}
+
+class ChangeStatus extends NotesEvent {
+  final NotesStates status;
+
+  ChangeStatus({required this.status});
+}
+
+class ChangeFoundList extends NotesEvent {
+  final List<Note> foundNotes;
+
+  ChangeFoundList({required this.foundNotes});
+}
