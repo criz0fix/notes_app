@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:notes_app/data/local/database.dart';
 import 'package:notes_app/data/models/note.dart';
 import 'package:notes_app/data/models/note_navigator_model.dart';
 
@@ -19,35 +18,47 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     on<FindNote>(_searchNote);
     on<ChangeStatus>(_changeStatus);
     on<ChangeFoundList>(_changeFoundList);
+    on<UpdateNoteList>(_updateNoteList);
   }
 
-  void _compareNotes(CompareNotes event, Emitter<NotesState> emit) {
+  Future<void> _compareNotes(
+      CompareNotes event, Emitter<NotesState> emit) async {
     if (_isFieldsNotEmpty(event.navigatorModel.note) &&
         event.navigatorModel.isSaved) {
+      // await NProvider.db.deleteNote(event.navigatorModel.note.noteId);
+      // await NProvider.db.insertNote(event.navigatorModel.note);
+      await NProvider.db.updateNote(
+          event.navigatorModel.note.noteId, event.navigatorModel.note);
       emit(state.copyWith(
           noteList: [...state.noteList]
-            ..removeAt(event.index)
+            ..removeWhere(
+                (note) => note.noteId == event.navigatorModel.note.noteId)
             ..insert(0, event.navigatorModel.note)));
       emit(state.copyWith(
           foundNotes: [...state.foundNotes]
-            ..removeAt(event.index)
+            ..removeWhere(
+                (note) => note.noteId == event.navigatorModel.note.noteId)
             ..insert(0, event.navigatorModel.note)));
     }
   }
 
-  void _createNote(CreateNote event, Emitter<NotesState> emit) {
+  Future<void> _createNote(CreateNote event, Emitter<NotesState> emit) async {
     if (_isFieldsNotEmpty(event.navigatorModel.note) &&
         event.navigatorModel.isSaved) {
       emit(state.copyWith(
           noteList: [...state.noteList]..insert(0, event.navigatorModel.note)));
+      await NProvider.db.insertNote(event.navigatorModel.note);
     }
   }
 
   bool _isFieldsNotEmpty(Note note) =>
       note.title.isNotEmpty || note.description.isNotEmpty;
 
-  void _deleteNote(DeleteNote event, Emitter<NotesState> emit) {
-    emit(state.copyWith(noteList: [...state.noteList]..removeAt(event.index)));
+  Future<void> _deleteNote(DeleteNote event, Emitter<NotesState> emit) async {
+    await NProvider.db.deleteNote(event.delNote.noteId);
+    emit(state.copyWith(
+        noteList: [...state.noteList]
+          ..removeWhere((note) => note.noteId == event.delNote.noteId)));
   }
 
   void _activateSearchField(
@@ -79,9 +90,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
       if (state.status == NotesStates.found) {
         emit(state.copyWith(
             status: NotesStates.found, foundNotes: searchingNotes));
-      } else if (state.status == NotesStates.notFound) {
-        log('not found');
-      }
+      } else if (state.status == NotesStates.notFound) {}
     }
   }
 
@@ -90,4 +99,10 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
 
   void _changeFoundList(ChangeFoundList event, Emitter<NotesState> emit) =>
       emit(state.copyWith(foundNotes: event.foundNotes));
+
+  Future<void> _updateNoteList(
+      UpdateNoteList event, Emitter<NotesState> emit) async {
+    final list = await NProvider.db.getNotes();
+    emit(state.copyWith(noteList: list));
+  }
 }

@@ -5,15 +5,13 @@ abstract class NotesEvent {}
 
 class CreateNote extends NotesEvent {
   final NoteNavigatorModel navigatorModel;
-
   CreateNote({required this.navigatorModel});
 }
 
 class CompareNotes extends NotesEvent {
   final NoteNavigatorModel navigatorModel;
-  final int index;
 
-  CompareNotes({required this.navigatorModel, required this.index});
+  CompareNotes({required this.navigatorModel});
 }
 
 class FindNote extends NotesEvent {
@@ -23,9 +21,8 @@ class FindNote extends NotesEvent {
 }
 
 class DeleteNote extends NotesEvent {
-  final int index;
-
-  DeleteNote({required this.index});
+  final Note delNote;
+  DeleteNote({required this.delNote});
 }
 
 class ActivateSearchField extends NotesEvent {}
@@ -43,3 +40,5 @@ class ChangeFoundList extends NotesEvent {
 
   ChangeFoundList({required this.foundNotes});
 }
+
+class UpdateNoteList extends NotesEvent {}

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +7,6 @@ import 'package:notes_app/core/utils/consts.dart';
 import 'package:notes_app/data/models/note.dart';
 import 'package:notes_app/data/models/note_navigator_model.dart';
 import 'package:notes_app/presentation/bloc/notes_bloc.dart';
-import 'package:notes_app/presentation/cubit/notes_cubit.dart';
 import 'package:notes_app/presentation/widgets/common_note_tile.dart';
 import 'package:notes_app/presentation/widgets/custom_button.dart';
 import 'package:notes_app/presentation/widgets/delete_background.dart';
@@ -28,10 +25,11 @@ class NotesList extends StatelessWidget {
               appBar: _ChangeableAppBar(myBloc: myBloc),
               floatingActionButton: FloatingActionButton(
                 onPressed: () async => await Navigator.pushNamed(
-                    context, Pages.notePage, arguments: {
-                  'note': Note.newNote()
-                }).then((newNote) => myBloc.add(
-                    CreateNote(navigatorModel: newNote as NoteNavigatorModel))),
+                    context, Pages.notePage,
+                    arguments: {'note': Note.newNote()}).then((newNote) {
+                  myBloc.add(CreateNote(
+                      navigatorModel: newNote as NoteNavigatorModel));
+                }),
                 child: const Icon(
                   Icons.add_outlined,
                   color: AppColor.white,
@@ -41,9 +39,9 @@ class NotesList extends StatelessWidget {
                 builder: (context) {
                   if (state.status == NotesStates.inititalized ||
                       state.status == NotesStates.found) {
-                    return _AllNotes();
+                    return const _AllNotes();
                   } else {
-                    return _NotFoundPage();
+                    return const _NotFoundPage();
                   }
                 },
               )),
@@ -71,10 +69,6 @@ class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
                 style: Theme.of(context).textTheme.bodyText2,
                 onChanged: (text) {
                   myBloc.add(FindNote(searchingNote: text));
-                  //myBloc.add(ChangeStatus(status: NotesStates.searching));
-                  // myBloc
-                  //   ..add(ChangeStatus(status: NotesStates.found))
-                  //   ..add(ChangeFoundList(foundNotes: searchingNotes));
                 },
                 decoration: InputDecoration(
                   suffixIcon: IconButton(
@@ -102,7 +96,6 @@ class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
             actions: <Widget>[
               CustomButton(
                 icon: Icons.search,
-                /*add textfield*/
                 onPressed: () => myBloc.add(ActivateSearchField()),
               ),
             ],
@@ -114,10 +107,21 @@ class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(appBarToolbarHeight);
 }
 
-class _AllNotes extends StatelessWidget {
-  _AllNotes({Key? key}) : super(key: key);
+class _AllNotes extends StatefulWidget {
+  const _AllNotes({Key? key}) : super(key: key);
 
+  @override
+  State<_AllNotes> createState() => _AllNotesState();
+}
+
+class _AllNotesState extends State<_AllNotes> {
   AlignmentDirectional? directioning;
+  @override
+  void initState() {
+    context.read<NotesBloc>().add(UpdateNoteList());
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final myBloc = context.read<NotesBloc>();
@@ -136,20 +140,17 @@ class _AllNotes extends StatelessWidget {
               key: UniqueKey(),
               background: const DeleteBackGround(),
               onDismissed: (direction) {
-                myBloc.add(DeleteNote(index: index));
+                myBloc.add(DeleteNote(delNote: item));
               },
               child: GestureDetector(
                 onTap: () async {
                   await Navigator.pushNamed(context, Pages.notePage,
                       arguments: {'note': item}).then((editedNote) {
-                    // final myNoteList = editedNote as List;
                     myBloc.add(
                       CompareNotes(
-                          navigatorModel: editedNote as NoteNavigatorModel,
-                          index: myBloc.state.noteList.indexOf(item)),
+                          navigatorModel: editedNote as NoteNavigatorModel),
                     );
                   });
-                  log(index.toString());
                 },
                 child: CommonNoteTile(
                   noteTitle: item.title,
