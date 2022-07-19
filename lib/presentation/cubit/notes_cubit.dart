@@ -1,7 +1,5 @@
-import 'dart:developer';
-
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notes_app/data/models/note.dart';
 
 part 'notes_state.dart';
@@ -12,7 +10,8 @@ class NotesCubit extends Cubit<PageNotesState> {
             title: myNote.title,
             description: myNote.description,
             readOnly: false,
-            isSaved: false));
+            isSaved: false,
+            noteId: myNote.noteId));
 
   void changeToEdit() => emit(state.copywith(readOnly: !state.readOnly));
 
@@ -21,7 +20,9 @@ class NotesCubit extends Cubit<PageNotesState> {
   void changeDescription(String newDescription) =>
       emit(state.copywith(description: newDescription));
 
-  void saveNote() => emit(state.copywith(noteId: 0, isSaved: true));
+  void saveNote() => emit(state.copywith(isSaved: true));
 
-  void resetSave() => emit(state.copywith(isSaved: false));
+  void createNote() => emit(state.copywith(isNew: true));
+
+  void resetSave() => emit(state.copywith(isSaved: false, isNew: false));
 }
