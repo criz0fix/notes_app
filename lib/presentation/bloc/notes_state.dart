@@ -10,6 +10,8 @@ class NotesState extends Equatable {
   final String? description;
   final List<Note> foundNotes;
   final bool isSearchActive;
+  final double posX;
+  final double posY;
 
   const NotesState(
       {required this.noteList,
@@ -18,11 +20,13 @@ class NotesState extends Equatable {
       this.isEmpty = false,
       this.title,
       this.description,
-      this.isSearchActive = false});
+      this.isSearchActive = false,
+      this.posX = 30,
+      this.posY = 30});
 
   @override
   List<Object> get props {
-    return [noteList, status, isEmpty, isSearchActive, foundNotes];
+    return [noteList, status, isEmpty, isSearchActive, foundNotes, posX, posY];
   }
 
   NotesState copyWith(
@@ -32,7 +36,9 @@ class NotesState extends Equatable {
       bool? isEmpty,
       String? title,
       String? description,
-      bool? isSearchActive}) {
+      bool? isSearchActive,
+      double? posX,
+      double? posY}) {
     return NotesState(
         noteList: noteList ?? this.noteList,
         foundNotes: foundNotes ?? this.foundNotes,
@@ -40,6 +46,8 @@ class NotesState extends Equatable {
         isEmpty: isEmpty ?? this.isEmpty,
         title: title ?? this.title,
         description: description ?? this.description,
-        isSearchActive: isSearchActive ?? this.isSearchActive);
+        isSearchActive: isSearchActive ?? this.isSearchActive,
+        posX: posX ?? this.posX,
+        posY: posY ?? this.posY);
   }
 }

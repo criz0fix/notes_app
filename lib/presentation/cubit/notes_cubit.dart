@@ -17,8 +17,7 @@ class NotesCubit extends Cubit<PageNotesState> {
 
   void changeTitle(String newTitle) => emit(state.copywith(title: newTitle));
 
-  void changeDescription(String newDescription) =>
-      emit(state.copywith(description: newDescription));
+  void changeDescription(String newDescription) => emit(state.copywith(description: newDescription));
 
   void saveNote() => emit(state.copywith(isSaved: true));
 

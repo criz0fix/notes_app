@@ -42,3 +42,9 @@ class ChangeFoundList extends NotesEvent {
 }
 
 class UpdateNoteList extends NotesEvent {}
+
+class GetPosition extends NotesEvent {
+  final LongPressStartDetails details;
+
+  GetPosition({required this.details});
+}

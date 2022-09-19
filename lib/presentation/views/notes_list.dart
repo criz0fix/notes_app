@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,11 +26,10 @@ class NotesList extends StatelessWidget {
           child: Scaffold(
               appBar: _ChangeableAppBar(myBloc: myBloc),
               floatingActionButton: FloatingActionButton(
-                onPressed: () async => await Navigator.pushNamed(
-                    context, Pages.notePage,
-                    arguments: {'note': Note.newNote()}).then((newNote) {
-                  myBloc.add(CreateNote(
-                      navigatorModel: newNote as NoteNavigatorModel));
+                onPressed: () async =>
+                    await Navigator.pushNamed(context, Pages.notePage, arguments: {'note': Note.newNote()})
+                        .then((newNote) {
+                  myBloc.add(CreateNote(navigatorModel: newNote as NoteNavigatorModel));
                 }),
                 child: const Icon(
                   Icons.add_outlined,
@@ -37,8 +38,7 @@ class NotesList extends StatelessWidget {
               ),
               body: Builder(
                 builder: (context) {
-                  if (state.status == NotesStates.inititalized ||
-                      state.status == NotesStates.found) {
+                  if (state.status == NotesStates.inititalized || state.status == NotesStates.found) {
                     return const _AllNotes();
                   } else {
                     return const _NotFoundPage();
@@ -85,9 +85,7 @@ class _ChangeableAppBar extends StatelessWidget with PreferredSizeWidget {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(30)),
+                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(30)),
                 ),
               ),
             ),
@@ -129,13 +127,9 @@ class _AllNotesState extends State<_AllNotes> {
       builder: (context, state) {
         return ListView.builder(
           physics: const BouncingScrollPhysics(),
-          itemCount: state.status == NotesStates.inititalized
-              ? state.noteList.length
-              : state.foundNotes.length,
+          itemCount: state.status == NotesStates.inititalized ? state.noteList.length : state.foundNotes.length,
           itemBuilder: ((context, index) {
-            final item = state.status == NotesStates.inititalized
-                ? state.noteList[index]
-                : state.foundNotes[index];
+            final item = state.status == NotesStates.inititalized ? state.noteList[index] : state.foundNotes[index];
             return Dismissible(
               key: UniqueKey(),
               background: const DeleteBackGround(),
@@ -143,12 +137,16 @@ class _AllNotesState extends State<_AllNotes> {
                 myBloc.add(DeleteNote(delNote: item));
               },
               child: GestureDetector(
+                onLongPressStart: (details) {
+                  myBloc.add(GetPosition(details: details));
+                },
+                onLongPress: () {
+                  _showContextMenu(context, myBloc.state.posX, myBloc.state.posY);
+                },
                 onTap: () async {
-                  await Navigator.pushNamed(context, Pages.notePage,
-                      arguments: {'note': item}).then((editedNote) {
+                  await Navigator.pushNamed(context, Pages.notePage, arguments: {'note': item}).then((editedNote) {
                     myBloc.add(
-                      CompareNotes(
-                          navigatorModel: editedNote as NoteNavigatorModel),
+                      CompareNotes(navigatorModel: editedNote as NoteNavigatorModel),
                     );
                   });
                 },
@@ -172,3 +170,28 @@ class _NotFoundPage extends StatelessWidget {
     return Center(child: Image.asset('assets/images/not-found.png'));
   }
 }
+
+void _showContextMenu(BuildContext context, double posX, double posY) async {
+  final RenderObject? overlay = Overlay.of(context)?.context.findRenderObject();
+  await showMenu(
+      context: context,
+      position: RelativeRect.fromRect(Rect.fromLTWH(posX, posY, 30, 30),
+          Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height)),
+      items: [
+        const PopupMenuItem(
+          value: 'pinUp',
+          child: Text('Pin up'),
+        ),
+        const PopupMenuItem(
+          value: 'comment',
+          child: Text('Write Comment'),
+        ),
+        const PopupMenuItem(
+          value: 'hide',
+          child: Text('Hide'),
+        ),
+      ]);
+}
+
+          // Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height)),
+
